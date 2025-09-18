@@ -1,0 +1,16 @@
+# caches / compiled
+**/.cache/
+**/*.log
+**/*cache*
+**/*.sqlite*
+**/*.db
+
+# secrets (adjust if you keep tokens elsewhere)
+**/*secret*
+**/*token*
+**/*.pem
+**/*.key
+
+# histories
+**/*history*
+**/Recent*
