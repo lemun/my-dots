@@ -1,0 +1,247 @@
+/* --- Color Variables --- */
+@define-color base-bg @background;
+@define-color accent @foreground;
+@import "../omarchy/current/theme/waybar.css";
+
+/* Additional color definitions */
+@define-color hover-bg alpha(@background, 0.8);
+@define-color warning #e5c07b;
+@define-color critical #e06c75;
+@define-color inactive #6a7a71;
+@define-color success #98c379;
+@define-color info #61afef;
+
+/* --- Global Styles --- */
+* {
+    color: @foreground;
+    border: none;
+    border-radius: 0;
+    font-family: 'CaskaydiaMono Nerd Font';
+    font-size: 12px;
+    font-weight: 500;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+    margin-top: 10px;
+}
+
+/* --- Layout Styles --- */
+.modules-left, 
+.modules-right {
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+/* --- Workspace Styles --- */
+#workspaces {
+    background-color: @background;
+    color: @foreground;
+    margin: 5px 0;
+    border-radius: 18px;
+    padding: 2px 6px;
+}
+
+#workspaces button {
+    background: transparent;
+    padding: 4px 8px;
+    margin: 0 2px;
+    border-radius: 12px;
+    min-width: 16px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#workspaces button:hover {
+    background-color: alpha(@foreground, 0.1);
+}
+
+#workspaces button.active {
+    background-color: @accent;
+    color: @background;
+}
+
+#workspaces button.urgent {
+    background-color: @critical;
+    color: @background;
+}
+
+#workspaces button.empty {
+    opacity: 0.6;
+}
+
+/* --- General Module Styles --- */
+#window,
+#mpris,
+#cpu,
+#memory,
+#temperature,
+#custom-update,
+#tray,
+#bluetooth,
+#network,
+#pulseaudio,
+#battery,
+#custom-omarchy,
+#custom-screenrecording-indicator,
+#clock {
+    background-color: @background;
+    color: @foreground;
+    padding: 0 12px;
+    margin: 5px 0;
+    border-radius: 16px;
+}
+
+/* --- Enhanced Hover Effects --- */
+#clock:hover,
+#mpris:hover,
+#cpu:hover,
+#memory:hover,
+#temperature:hover,
+#custom-update:hover,
+#bluetooth:hover,
+#network:hover,
+#pulseaudio:hover,
+#battery:hover,
+#custom-screenrecording-indicator:hover,
+#custom-omarchy:hover,
+
+/* --- Specific Module Overrides --- */
+#custom-omarchy {
+    border-radius: 18px;
+    margin-right: 5px;
+    font-size: 16px;
+    padding: 0 14px;
+    background-color: @accent;
+    color: @background;
+    font-weight: 700;
+}
+
+#clock {
+    border-radius: 18px;
+    padding: 0 14px;
+    font-weight: 600;
+}
+
+#window {
+    margin: 5px 0;
+    padding: 0 12px;
+    border-radius: 16px;
+    margin-left: 5px;
+    font-style: italic;
+}
+
+#mpris {
+    margin: 5px 0;
+    padding: 0 12px;
+    border-radius: 16px;
+    margin-right: 5px;
+}
+
+window#waybar.empty #window {
+    background: transparent;
+    padding: 0;
+    margin-left: 0;
+}
+
+#custom-update {
+    border-radius: 16px;
+    margin-left: 10px;
+    padding: 0 12px;
+    background-color: @info;
+    color: @background;
+}
+
+#custom-screenrecording-indicator {
+    border-radius: 18px;
+    min-width: 16px;
+    margin-left: 10px;
+    font-size: 11px;
+    padding: 0 12px;
+}
+
+#custom-screenrecording-indicator.active {
+    background-color: @critical;
+    color: @background;
+}
+
+/* --- Tray Group Styles --- */
+#tray-expander {
+    background: @background;
+    margin: 5px 0;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+    padding-left: 12px;
+}
+
+#battery {
+    margin: 5px 0;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+    padding: 0 12px;
+    font-weight: 600;
+}
+
+#tray {
+    padding-left: 10px;
+    background: transparent;
+}
+
+/* --- Status States --- */
+#network.disconnected,
+#bluetooth.disabled,
+#pulseaudio.muted {
+    color: @critical;
+}
+
+#network.connected {
+    color: @success;
+}
+
+#bluetooth.connected {
+    color: @success;
+}
+
+#battery.warning:not(.charging) {
+    color: @warning;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @success;
+}
+
+#battery.critical:not(.charging) {
+    background-color: @critical;
+    color: @background;
+}
+
+#cpu.warning {
+    color: @warning;
+}
+
+#cpu.critical {
+    color: @critical;
+}
+
+#memory.warning {
+    color: @warning;
+}
+
+#memory.critical {
+    color: @critical;
+}
+
+/* --- Tooltip Styles --- */
+tooltip {
+    background-color: @background;
+    border-radius: 16px;
+    padding: 12px 16px;
+    border: 1px solid alpha(@foreground, 0.2);
+}
+
+tooltip label {
+    color: @foreground;
+    font-weight: 500;
+}
