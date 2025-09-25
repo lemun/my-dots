@@ -8,5 +8,23 @@
     "workbench.layoutControl.enabled": false,
     "workbench.colorTheme": "Tokyo Night",
     "workbench.iconTheme": "material-icon-theme",
-    "explorer.confirmDelete": false
+    "explorer.confirmDelete": false,
+    "git.confirmSync": false,
+    "files.autoSave": "onFocusChange",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always",
+      "source.fixAll.eslint": "always",
+      "editor.guides.bracketPairs": "always",
+      "editor.bracketPairColorization.enabled": "always",
+    },
+    "editor.inlayHints.enabled": "on",
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/.next": true,
+        "**/coverage": true
+        },
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
 }
