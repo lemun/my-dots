@@ -104,14 +104,14 @@
     "format-linked": "󰈀 {ifname} (No IP)",
     "format-disconnected": "󰤮 Disconnected",
     "format-alt": "{icon} {ipaddr}/{cidr}",
+    "format-alt-click": "click-right",
     "tooltip-format": "󰛳 {ifname}: {ipaddr}/{cidr}",
     "tooltip-format-wifi": "󰛳 {essid} ({signalStrength}%) - {frequency} GHz\n󰩠 {ipaddr}/{cidr}\n󰓅 ⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
     "tooltip-format-ethernet": "󰈀 {ifname}\n󰩠 {ipaddr}/{cidr}\n󰓅 ⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
     "tooltip-format-disconnected": "󰤮 Network Disconnected",
     "max-length": 30,
     "interval": 3,
-    "on-click": "omarchy-launch-wifi",
-    "on-click-right": "nm-connection-editor"
+    "on-click": "omarchy-launch-wifi"
   },
   "battery": {
     "format": "{capacity}% {icon}",

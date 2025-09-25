@@ -199,10 +199,6 @@ window#waybar.empty #window {
     color: @success;
 }
 
-#bluetooth.connected {
-    color: @success;
-}
-
 #battery.warning:not(.charging) {
     color: @warning;
 }
