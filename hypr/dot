@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Hyprland configuration deployment script
+# This script copies all Hyprland configs to ~/.config/hypr/
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET_DIR="$HOME/.config/hypr"
+
+echo "Deploying Hyprland configuration..."
+
+# Create config directory if it doesn't exist
+mkdir -p "$TARGET_DIR"
+
+# Function to deploy a config file
+deploy_config() {
+    local config_file="$1"
+    local source_file="$SCRIPT_DIR/$config_file"
+    local target_file="$TARGET_DIR/$config_file"
+
+    if [[ ! -f "$source_file" ]]; then
+        echo "Warning: $config_file not found in $SCRIPT_DIR"
+        return 1
+    fi
+
+    # Backup existing config if it exists
+    if [[ -f "$target_file" ]]; then
+        local backup="${target_file}.backup.$(date +%Y%m%d_%H%M%S)"
+        echo "Backing up existing $config_file to $backup"
+        cp "$target_file" "$backup"
+    fi
+
+    # Copy new config
+    echo "Copying $config_file to ~/.config/hypr/"
+    cp "$source_file" "$target_file"
+}
+
+# Deploy all configuration files
+deploy_config "monitors.conf"
+deploy_config "bindings.conf"
+deploy_config "input.conf"
+
+echo "Hyprland configuration deployed successfully!"
+echo "Reload Hyprland configuration or restart Hyprland to apply changes"
+echo "Use 'hyprctl reload' to reload without restarting"

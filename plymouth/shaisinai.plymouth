@@ -1,0 +1,11 @@
+[Plymouth Theme]
+Name=Shaisinai
+Description=Shaisinai splash screen.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/shaisinai
+ScriptFile=/usr/share/plymouth/themes/shaisinai/shaisinai.script
+ConsoleLogBackgroundColor=0x1a1b26
+MonospaceFont=Cantarell 11
+Font=Cantarell 11

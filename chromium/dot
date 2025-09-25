@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Chromium configuration deployment script
+# This script copies the chromium-flags.conf to ~/.config/
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/chromium-flags.conf"
+TARGET="$HOME/.config/chromium-flags.conf"
+
+echo "🌐 Deploying Chromium configuration..."
+
+# Check if source config exists
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "Error: chromium-flags.conf not found in $SCRIPT_DIR"
+    exit 1
+fi
+
+# Create config directory if it doesn't exist
+mkdir -p "$(dirname "$TARGET")"
+
+# Backup existing config if it exists
+if [[ -f "$TARGET" ]]; then
+    BACKUP="${TARGET}.backup.$(date +%Y%m%d_%H%M%S)"
+    echo "Backing up existing config to $BACKUP"
+    cp "$TARGET" "$BACKUP"
+fi
+
+# Copy new config
+echo "Copying chromium-flags.conf to ~/.config/"
+cp "$CONFIG_FILE" "$TARGET"
+
+echo "Chromium configuration deployed successfully!"
+echo "Restart Chromium to apply the new flags"

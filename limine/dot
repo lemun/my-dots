@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# Limine bootloader configuration deployment script
+# This script generates limine.conf from template with machine-specific values
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_FILE="$SCRIPT_DIR/limine.conf.template"
+CONFIG_FILE="$SCRIPT_DIR/limine.conf"
+TARGET="/boot/limine.conf"
+
+echo "Deploying Limine configuration..."
+
+# Check if template exists
+if [[ ! -f "$TEMPLATE_FILE" ]]; then
+    echo "Error: limine.conf.template not found in $SCRIPT_DIR"
+    exit 1
+fi
+
+# Auto-detect machine ID
+MACHINE_ID=""
+if [[ -f "/etc/machine-id" ]]; then
+    MACHINE_ID=$(cat /etc/machine-id)
+    echo "Detected machine ID: $MACHINE_ID"
+else
+    echo "Error: Could not detect machine ID from /etc/machine-id"
+    exit 1
+fi
+
+# Auto-detect encrypted device PARTUUID
+echo "Detecting encrypted device PARTUUID..."
+ENCRYPTED_DEVICE_PARTUUID=""
+
+# Method 1: Check crypttab
+if [[ -f "/etc/crypttab" ]] && [[ -s "/etc/crypttab" ]]; then
+    # Look for PARTUUID in crypttab
+    PARTUUID_LINE=$(grep -E "PARTUUID=" /etc/crypttab | head -n1 || true)
+    if [[ -n "$PARTUUID_LINE" ]]; then
+        ENCRYPTED_DEVICE_PARTUUID=$(echo "$PARTUUID_LINE" | grep -oE "PARTUUID=[a-fA-F0-9-]+" | cut -d= -f2)
+        echo "Found PARTUUID in /etc/crypttab: $ENCRYPTED_DEVICE_PARTUUID"
+    fi
+fi
+
+# Method 2: Check kernel cmdline if crypttab method failed
+if [[ -z "$ENCRYPTED_DEVICE_PARTUUID" ]]; then
+    CMDLINE_PARTUUID=$(grep -oE "cryptdevice=PARTUUID=[a-fA-F0-9-]+" /proc/cmdline | cut -d= -f3 | head -n1 || true)
+    if [[ -n "$CMDLINE_PARTUUID" ]]; then
+        ENCRYPTED_DEVICE_PARTUUID="$CMDLINE_PARTUUID"
+        echo "Found PARTUUID in kernel cmdline: $ENCRYPTED_DEVICE_PARTUUID"
+    fi
+fi
+
+# Method 3: Interactive fallback
+if [[ -z "$ENCRYPTED_DEVICE_PARTUUID" ]]; then
+    echo "Could not auto-detect encrypted device PARTUUID."
+    echo "Please check your /etc/crypttab or provide it manually:"
+    echo "Available block devices with PARTUUID:"
+    lsblk -o NAME,PARTUUID | grep -v "^NAME"
+    echo
+    read -p "Enter the PARTUUID of your encrypted device: " ENCRYPTED_DEVICE_PARTUUID
+
+    if [[ -z "$ENCRYPTED_DEVICE_PARTUUID" ]]; then
+        echo "Error: PARTUUID is required"
+        exit 1
+    fi
+fi
+
+echo "Using PARTUUID: $ENCRYPTED_DEVICE_PARTUUID"
+
+# Generate config from template
+echo "Generating configuration from template..."
+sed -e "s/__MACHINE_ID__/$MACHINE_ID/g" \
+    -e "s/__ENCRYPTED_DEVICE_PARTUUID__/$ENCRYPTED_DEVICE_PARTUUID/g" \
+    "$TEMPLATE_FILE" > "$CONFIG_FILE"
+
+echo "Generated limine.conf with:"
+echo "  Machine ID: $MACHINE_ID"
+echo "  Encrypted Device PARTUUID: $ENCRYPTED_DEVICE_PARTUUID"
+
+# Backup existing config if it exists
+if [[ -f "$TARGET" ]]; then
+    BACKUP="${TARGET}.backup.$(date +%Y%m%d_%H%M%S)"
+    echo "Backing up existing config to $BACKUP"
+    sudo cp "$TARGET" "$BACKUP"
+fi
+
+# Copy new config
+echo "Copying generated limine.conf to /boot/"
+sudo cp "$CONFIG_FILE" "$TARGET"
+
+echo "Limine configuration deployed successfully!"
+echo "Remember to update bootloader if needed"

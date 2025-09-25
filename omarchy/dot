@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Omarchy system configuration deployment script
+# This script copies Omarchy-specific configs to ~/.config/omarchy/
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET_DIR="$HOME/.config/omarchy"
+
+echo "Deploying Omarchy system configuration..."
+
+# Create config directories if they don't exist
+mkdir -p "$TARGET_DIR/branding"
+
+# Function to deploy a config file
+deploy_config() {
+    local config_file="$1"
+    local target_subpath="$2"
+    local source_file="$SCRIPT_DIR/$config_file"
+    local target_file="$TARGET_DIR/$target_subpath"
+    local target_dir="$(dirname "$target_file")"
+
+    if [[ ! -f "$source_file" ]]; then
+        echo "Warning: $config_file not found in $SCRIPT_DIR"
+        return 1
+    fi
+
+    # Create target directory if needed
+    mkdir -p "$target_dir"
+
+    # Backup existing config if it exists
+    if [[ -f "$target_file" ]]; then
+        local backup="${target_file}.backup.$(date +%Y%m%d_%H%M%S)"
+        echo "Backing up existing $config_file to $backup"
+        cp "$target_file" "$backup"
+    fi
+
+    # Copy new config
+    echo "Copying $config_file to ~/.config/omarchy/$target_subpath"
+    cp "$source_file" "$target_file"
+}
+
+# Deploy all configuration files
+deploy_config "screensaver.txt" "branding/screensaver.txt"
+
+echo "Omarchy configuration deployed successfully!"
+echo "Custom branding is now available for screensaver/lock screen"

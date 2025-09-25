@@ -1,0 +1,113 @@
+#!/bin/bash
+
+# Plymouth theme deployment script
+# This script installs the Shaisinai Plymouth theme and sets it as default
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+THEME_NAME="shaisinai"
+SOURCE_THEME_DIR="$SCRIPT_DIR"
+TARGET_THEME_DIR="/usr/share/plymouth/themes/$THEME_NAME"
+
+echo "Deploying Plymouth theme: $THEME_NAME"
+
+# Check if running as root
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root (use sudo)"
+   exit 1
+fi
+
+# Verify source theme files exist in current directory
+if [[ ! -f "$SOURCE_THEME_DIR/$THEME_NAME.plymouth" ]]; then
+    echo "Error: Theme files not found in: $SOURCE_THEME_DIR"
+    exit 1
+fi
+
+# Verify required theme files exist
+required_files=(
+    "$THEME_NAME.plymouth"
+    "$THEME_NAME.script"
+    "logo.png"
+    "progress_bar.png"
+    "progress_box.png"
+    "lock.png"
+    "entry.png"
+    "bullet.png"
+)
+
+echo "Verifying theme files..."
+for file in "${required_files[@]}"; do
+    if [[ ! -f "$SOURCE_THEME_DIR/$file" ]]; then
+        echo "Error: Required file missing: $file"
+        exit 1
+    fi
+    echo "✓ Found: $file"
+done
+
+# Backup existing theme if it exists
+if [[ -d "$TARGET_THEME_DIR" ]]; then
+    BACKUP_DIR="${TARGET_THEME_DIR}.backup.$(date +%Y%m%d_%H%M%S)"
+    echo "Backing up existing theme to $BACKUP_DIR"
+    cp -r "$TARGET_THEME_DIR" "$BACKUP_DIR"
+fi
+
+# Ensure the Plymouth themes directory exists
+echo "Ensuring Plymouth themes directory exists..."
+mkdir -p "/usr/share/plymouth/themes"
+
+# Create target theme directory
+echo "Creating theme directory: $TARGET_THEME_DIR"
+mkdir -p "$TARGET_THEME_DIR"
+
+# Copy theme files (exclude dot script and README)
+echo "Copying theme files..."
+for file in "${required_files[@]}"; do
+    cp "$SOURCE_THEME_DIR/$file" "$TARGET_THEME_DIR/"
+done
+
+# Set proper permissions
+echo "Setting proper permissions..."
+chmod 644 "$TARGET_THEME_DIR"/*
+chmod 755 "$TARGET_THEME_DIR"
+
+# Get current default theme for backup info
+CURRENT_THEME=$(plymouth-set-default-theme)
+echo "Current default theme: $CURRENT_THEME"
+
+# Set as default theme
+echo "Setting $THEME_NAME as default Plymouth theme..."
+plymouth-set-default-theme "$THEME_NAME"
+
+# Determine the correct initramfs rebuild command
+if command -v dracut &> /dev/null; then
+    echo "Rebuilding initramfs with dracut..."
+    dracut --force
+elif command -v update-initramfs &> /dev/null; then
+    echo "Rebuilding initramfs with update-initramfs..."
+    update-initramfs -u
+else
+    echo "Warning: Could not find dracut or update-initramfs"
+    echo "   You may need to manually rebuild your initramfs for the theme to take effect"
+fi
+
+# Verify installation
+echo "Verifying installation..."
+NEW_THEME=$(plymouth-set-default-theme)
+if [[ "$NEW_THEME" == "$THEME_NAME" ]]; then
+    echo "Plymouth theme '$THEME_NAME' installed and set as default successfully!"
+else
+    echo "Error: Failed to set theme as default (got: $NEW_THEME)"
+    exit 1
+fi
+
+echo ""
+echo "Installation complete!"
+echo "The new theme will be visible on next boot/reboot"
+echo "To revert to previous theme: sudo plymouth-set-default-theme $CURRENT_THEME"
+echo ""
+echo "Theme details:"
+echo "   • Name: Shaisinai"
+echo "   • Location: $TARGET_THEME_DIR"
+echo "   • Features: Custom logo, animated progress, password dialogs"
+echo "   • Color scheme: Tokyo Night"
