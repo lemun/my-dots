@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Paths
+REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SRC_CONFIG="$REPO_DIR/config.jsonc"
+SRC_STYLE="$REPO_DIR/style.css"
+
+DEST_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/waybar"
+DEST_CONFIG="$DEST_DIR/config.jsonc"
+DEST_STYLE="$DEST_DIR/style.css"
+
+mkdir -p "$DEST_DIR"
+
+backup_file () {
+  local target="$1"
+  if [[ -e "$target" && ! -L "$target" ]]; then
+    cp -a -- "$target" "$target.bak.$(date +%Y%m%d%H%M%S)"
+    echo "Backed up $target -> ${target}.bak.*"
+  fi
+}
+
+link_it () {
+  local src="$1" dst="$2"
+  if [[ -e "$src" ]]; then
+    backup_file "$dst"
+    rm -f -- "$dst"
+    ln -s -- "$src" "$dst"
+    echo "Linked $dst -> $src"
+  else
+    echo "Note: source file missing, skipped: $src"
+  fi
+}
+
+# Link files if present in repo
+link_it "$SRC_CONFIG" "$DEST_CONFIG"
+link_it "$SRC_STYLE"  "$DEST_STYLE"
+
+# Try to reload Waybar if it's running
+if pgrep -x waybar >/dev/null 2>&1; then
+  # Waybar reloads config/style on SIGUSR2
+  pkill -USR2 waybar && echo "Reloaded Waybar (SIGUSR2 sent)."
+else
+  echo "Waybar doesn't seem to be running. Start it when ready (e.g., 'waybar &' or via your WM/Compositor)."
+fi
+
+echo "Waybar dotfiles applied."
